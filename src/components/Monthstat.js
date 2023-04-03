@@ -27,6 +27,7 @@ if(localStorage.getItem("mon")){
 localStorage.removeItem("mon")}
   },[]);  
 
+
   async function fetchmoData() {
     setfsuc(false);
     setmon(month)
@@ -41,6 +42,18 @@ localStorage.removeItem("mon")}
   });
   const json = await response.json()
   let j=0;
+  function GetSortOrder(prop) {    
+    return function(a, b) {    
+        if (parseInt(a[prop]) >parseInt(b[prop])) {    
+            return 1;    
+        } else if (parseInt(a[prop]) <parseInt(b[prop])) {    
+            return -1;    
+        }    
+        return 0;    
+    }    
+} ;
+  json.sort(GetSortOrder("_id"));
+  console.log(json);
   let exar=[]
   for(let i=0;i<totalday;i++){
     if(j<json.length&&(i==parseInt(json[j]._id)-1))
@@ -48,6 +61,7 @@ localStorage.removeItem("mon")}
     j++;}
     else
     {exar[i]=0;}
+    
   }
  setmodetail(exar);
  setfsuc(true);
@@ -63,17 +77,103 @@ localStorage.removeItem("mon")}
         labels[index] = "Day"+(index+1);
         
     }
+    console.log(modetail);
     const data = {
+      //labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
       labels: labels,
-      datasets: [
-        {
-          label: "expense vs day",
-          backgroundColor: "rgb(25, 99, 132)",
-          borderColor: "rgb(155, 199, 132)",
-          data: modetail,
-        },
-      ],
+      datasets: [{
+        label: 'Expense Vs Day',
+        //data: [18, 12, 6, 9, 12, 3, 9],
+        data: modetail,
+       
+        backgroundColor: [
+          'rgba(255, 26, 104, 1)',
+          'rgba(54, 162, 235, 1)',
+          'rgba(255, 206, 86, 1)',
+          'rgba(75, 192, 192, 1)',
+          'rgba(153, 102, 255, 1)',
+          'rgba(255, 159, 64, 1)',
+          'rgba(7, 236, 91, 1)'
+        ],
+        borderWidth: 0,
+        borderSkipped:false,
+        borderRadius:6,
+        barPercentage:0.5,
+        categoryPercentage:0.8
+      }]
     };
+    //--------------------------------------------------
+    const progressBar={
+      id:'progressBar',
+      beforeDatasetsDraw(chart,pluginOptions){
+        const {ctx,chartArea:{bottom,height,left,right,top,width},scales:{x,y}}=chart;
+        const barwidth=(width/x.ticks.length*data.datasets[0].barPercentage*data.datasets[0].categoryPercentage);
+       // console.log("height : ");
+       // console.log(height);
+       const borderColor= [ 
+        'rgba(255, 26, 104, 0.05)',
+        'rgba(54, 162, 235, 0.05)',
+        'rgba(255, 206, 86, 0.05)',
+        'rgba(75, 192, 192, 0.05)',
+        'rgba(153, 102, 255, 0.05)',
+        'rgba(255, 159, 64, 0.05)',
+        'rgba(1, 249, 1, 0.05)'
+      ];
+        for(let i=0;i<31;i++)
+        {
+          
+        ctx.save();
+        ctx.fillStyle=borderColor[(i%7)];
+        //ctx.fillRect(10,10,1000,100);
+        ctx.beginPath();
+        //ctx.fillRect(x.getPixelForValue(i)-(barwidth/2),top+5,barwidth,height-20);
+        ctx.arc(x.getPixelForValue(i), top+5, 5, Math.PI, 2*Math.PI);
+        ctx.arc(x.getPixelForValue(i), top+5+height-10, 5, 0, Math.PI);
+        ctx.fill();
+        }
+      }
+    };
+   
+     const options= {
+        plugins:{
+          indexAxis:'y',
+          legend:{
+           // display:false
+          }
+        },
+        scales: {
+          x: {
+            beginAtZero: true,
+            grid:{
+               // display:false,
+               drawBorder:false
+            },
+            ticks:{
+              //display:false
+              color: (c) => { return 'rgba(13, 245, 233, 0.8)';},
+            }
+          },
+          y: {
+            beginAtZero: true,
+            grid:{
+               // display:false,
+                drawBorder:false
+            },
+            ticks:{
+             // display:false
+             color: (c) => { return 'rgba(13, 245, 233, 0.8)';},
+            }
+          }
+        }
+      };
+      
+
+    
+   
+
+     // line -194   <div className='chartstat shadow-lg p-2  rounded mx-2 my-2'><Line  data={data} /></div>
+
+    //--------------------------------------------------
     return(
         <>
         {(localStorage.getItem("token"))?
@@ -104,8 +204,8 @@ localStorage.removeItem("mon")}
                 </div>
             </div>
         <div className='col-lg-6'>
-          <div className='chartstat shadow-lg p-2 rounded mx-2 my-2'><Bar  data={data} /></div>
-          <div className='chartstat shadow-lg p-2  rounded mx-2 my-2'><Line  data={data} /></div>
+        <div className='chartstat shadow-lg p-3 rounded mx-2 my-2' ><Bar  data={data} options={options} plugins={[progressBar]} /></div>
+       
         </div>
         </div>
         </>
