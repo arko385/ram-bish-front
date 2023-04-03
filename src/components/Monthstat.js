@@ -78,6 +78,37 @@ localStorage.removeItem("mon")}
         
     }
     console.log(modetail);
+    let val=true;
+   if(window.screen.width<450)
+   val=false;
+    const data1 = {
+      //labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+      labels: labels,
+      datasets: [{
+        label: 'Expense Vs Day',
+        //data: [18, 12, 6, 9, 12, 3, 9],
+        data: modetail,
+       
+        backgroundColor:context=>{
+          const chart=context.chart;
+          const{ctx,chartArea,scales}=chart;
+          if(!chartArea){return null};
+          return getGradient(ctx,chartArea,scales)
+        },
+       
+        borderColor: [
+          'rgba(255, 26, 104, 1)',
+          'rgba(54, 162, 235, 1)',
+          'rgba(255, 206, 86, 1)',
+          'rgba(75, 192, 192, 1)',
+          'rgba(153, 102, 255, 1)',
+          'rgba(255, 159, 64, 1)',
+          'rgba(0, 0, 0, 1)'
+        ],
+        tension: 0.4,
+        fill:true
+      }]
+    };
     const data = {
       //labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
       labels: labels,
@@ -133,8 +164,47 @@ localStorage.removeItem("mon")}
         }
       }
     };
+    // option for line chart
+    const options1=  {
+      maintainAspectRatio:val,
+      scales: {
+        x: {
+          beginAtZero: true,
+          grid:{
+              display:false,
+             drawBorder:false
+          },
+          ticks:{
+            //display:false
+            color: (c) => { return 'rgba(13, 245, 233, 0.8)';},
+          }
+        },
+        y: {
+          beginAtZero: true,
+          grid:{
+              display:false,
+              drawBorder:false
+          },
+          ticks:{
+           // display:false
+           color: (c) => { return 'rgba(13, 245, 233, 0.8)';},
+          }
+        }
+      }
+    }
+    function getGradient(ctx,chartArea,scales){
+      const gradientBg=ctx.createLinearGradient(chartArea.left,0,chartArea.right,0);
+      gradientBg.addColorStop(0,'rgba(255, 26, 104, 1)');
+      gradientBg.addColorStop(0.2,'rgba(54, 162, 235, 1)');
+      gradientBg.addColorStop(0.4,'rgba(255, 206, 86, 1)');
+      gradientBg.addColorStop(0.6,'rgba(75, 192, 192, 1)');
+      gradientBg.addColorStop(0.8,'rgba(153, 102, 255, 1)');
+      gradientBg.addColorStop(1,'rgba(255, 159, 64, 1)');
+      return gradientBg;
+    }
    
      const options= {
+      maintainAspectRatio:val,
         plugins:{
           indexAxis:'y',
           legend:{
@@ -145,7 +215,7 @@ localStorage.removeItem("mon")}
           x: {
             beginAtZero: true,
             grid:{
-               // display:false,
+                display:false,
                drawBorder:false
             },
             ticks:{
@@ -156,7 +226,7 @@ localStorage.removeItem("mon")}
           y: {
             beginAtZero: true,
             grid:{
-               // display:false,
+                display:false,
                 drawBorder:false
             },
             ticks:{
@@ -204,8 +274,8 @@ localStorage.removeItem("mon")}
                 </div>
             </div>
         <div className='col-lg-6'>
-        <div className='chartstat shadow-lg p-3 rounded mx-2 my-2' ><Bar  data={data} options={options} plugins={[progressBar]} /></div>
-       
+        <div className='chartstat shadow-lg p-2 rounded mx-2 my-2' ><Bar  data={data} options={options} plugins={[progressBar]} /></div>
+        <div className='chartstat shadow-lg p-2  rounded mx-2 my-2'><Line  data={data1} options={options1} /></div>
         </div>
         </div>
         </>
